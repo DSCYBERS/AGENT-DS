@@ -1,0 +1,124 @@
+# Agent DS - AI Learning Configuration
+# Configuration for autonomous learning and adaptive attack features
+
+ai_learning:
+  # Core Learning Settings
+  enabled: true
+  learning_rate: 0.001
+  batch_size: 32
+  epochs: 100
+  
+  # Database Configuration
+  database_path: "data/ai_learning.db"
+  model_path: "ai_models/learning"
+  backup_interval: 3600  # seconds
+  
+  # Learning Sources Configuration
+  sources:
+    internal_missions: true
+    external_intelligence: true
+    sandbox_experimentation: true
+  
+  # External Intelligence Sources
+  external_sources:
+    cve_org:
+      enabled: true
+      api_endpoint: "https://services.nvd.nist.gov/rest/json/cves/1.0"
+      update_interval: 86400  # 24 hours
+      max_results: 100
+    
+    alienvault_otx:
+      enabled: true
+      api_key: "${OTX_API_KEY}"
+      api_endpoint: "https://otx.alienvault.com/api/v1"
+      update_interval: 43200  # 12 hours
+    
+    exploitdb:
+      enabled: true
+      api_endpoint: "https://www.exploit-db.com/api/v1"
+      update_interval: 86400  # 24 hours
+  
+  # Sandbox Configuration
+  sandbox:
+    enabled: true
+    isolation_level: "high"
+    timeout: 300  # seconds
+    max_concurrent_experiments: 5
+    safety_checks: true
+  
+  # AI Model Configuration
+  models:
+    payload_generator:
+      type: "transformer"
+      model_name: "gpt2"
+      max_length: 512
+      temperature: 0.8
+      top_p: 0.9
+    
+    success_predictor:
+      type: "random_forest"
+      n_estimators: 100
+      max_depth: 10
+      min_samples_split: 2
+    
+    attack_sequencer:
+      type: "neural_network"
+      hidden_layers: [128, 64, 32]
+      activation: "relu"
+      optimizer: "adam"
+  
+  # Learning Thresholds
+  thresholds:
+    minimum_confidence: 0.7
+    success_threshold: 0.8
+    adaptation_trigger: 0.5
+    experiment_success_rate: 0.1
+  
+  # Adaptive Attack Configuration
+  adaptive_attacks:
+    max_adaptation_attempts: 3
+    real_time_monitoring: true
+    auto_evasion: true
+    dynamic_payload_generation: true
+    
+    # Evasion Techniques
+    evasion_techniques:
+      - "encoding"
+      - "obfuscation"
+      - "timing_variation"
+      - "user_agent_rotation"
+      - "proxy_rotation"
+      - "payload_fragmentation"
+  
+  # Learning Performance Metrics
+  metrics:
+    track_success_rates: true
+    track_response_times: true
+    track_detection_rates: true
+    track_payload_effectiveness: true
+    generate_improvement_reports: true
+  
+  # Security and Compliance
+  security:
+    encrypt_learning_data: true
+    audit_all_decisions: true
+    require_authorization: true
+    sandbox_isolation: true
+    
+  # Logging Configuration
+  logging:
+    level: "INFO"
+    log_ai_decisions: true
+    log_adaptations: true
+    log_experiments: true
+    retention_days: 90
+
+# Feature Flags for AI Learning
+feature_flags:
+  autonomous_mode: true
+  real_time_adaptation: true
+  external_intelligence_integration: true
+  sandbox_experimentation: true
+  payload_innovation: true
+  zero_click_learning: false  # Requires explicit authorization
+  government_mode: true  # Enhanced security and compliance
