@@ -368,46 +368,154 @@ Input Target → Context Analysis → Strategic Planning → Adaptive Execution 
     └─────────────────────────────────────────────────────────────────┘
 ```
 
-## 🎨 User Interface
+## � **Immersive Combat Experience**
 
-### 💻 Terminal Interface Features
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                     CYBERPUNK TERMINAL                         │
-└─────────────────────────────────────────────────────────────────┘
-
- ╔══════════════════════════════════════════════════════════════╗
- ║  🚀 AGENT DS v2.0 - AI SECURITY FRAMEWORK               [■] ║
- ╠══════════════════════════════════════════════════════════════╣
- ║                                                              ║
- ║  🎯 Target: example.com                Status: ✅ Active      ║
- ║  🧠 AI Mode: Neural Network            Phase: 3/10          ║
- ║  ⚡ Speed: Real-time                   Found: 12 vulns      ║
- ║                                                              ║
- ║  ┌─────────────────────────────────────────────────────────┐ ║
- ║  │ 🔍 [Phase 3] Web Application Analysis                  │ ║
- ║  │ ├─ ✅ XSS Detection     [96% confidence]               │ ║
- ║  │ ├─ ⚡ SQL Injection     [Processing...]                │ ║
- ║  │ └─ 🔄 CSRF Testing      [Queued]                       │ ║
- ║  └─────────────────────────────────────────────────────────┘ ║
- ║                                                              ║
- ║  📊 Performance: [████████████████████████        ] 85%     ║
- ║  🎯 Accuracy:    [███████████████████████████████ ] 96%     ║
- ║                                                              ║
- ╚══════════════════════════════════════════════════════════════╝
-```
-
-### 📊 Dashboard Interface
+<div align="center">
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        SECURITY DASHBOARD                      │
-└─────────────────────────────────────────────────────────────────┘
+    ┌─────────────────────────────────────────────────────────────────┐
+    │                🎮 CYBER WARFARE SIMULATION                     │
+    │                                                                 │
+    │   ████████╗██████╗ ██╗   ██╗    ██╗████████╗                  │
+    │   ╚══██╔══╝██╔══██╗╚██╗ ██╔╝    ██║╚══██╔══╝                  │
+    │      ██║   ██████╔╝ ╚████╔╝     ██║   ██║                     │
+    │      ██║   ██╔══██╗  ╚██╔╝      ██║   ██║                     │
+    │      ██║   ██║  ██║   ██║       ██║   ██║                     │
+    │      ╚═╝   ╚═╝  ╚═╝   ╚═╝       ╚═╝   ╚═╝                     │
+    │                                                                 │
+    │         🚀 LAUNCH SEQUENCE INITIATED 🚀                        │
+    └─────────────────────────────────────────────────────────────────┘
+```
 
-┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
-│   📈 Statistics │  │   🎯 Targets    │  │   ⚡ Performance │
-│                 │  │                 │  │                 │
+[![⚡ INSTANT LAUNCH](https://img.shields.io/badge/⚡_INSTANT_LAUNCH-Try_Now-FF0000?style=for-the-badge&labelColor=000000&logo=rocket)](https://github.com/DSCYBERS/AGENT-DS)
+[![🎥 COMBAT FOOTAGE](https://img.shields.io/badge/🎥_COMBAT_FOOTAGE-Watch_Live-00FF00?style=for-the-badge&labelColor=000000&logo=youtube)](https://github.com/DSCYBERS/AGENT-DS)
+[![🌊 LIVE STREAM](https://img.shields.io/badge/🌊_LIVE_STREAM-Join_Battle-FF00FF?style=for-the-badge&labelColor=000000&logo=twitch)](https://github.com/DSCYBERS/AGENT-DS)
+[![🔥 SANDBOX MODE](https://img.shields.io/badge/🔥_SANDBOX_MODE-Safe_Zone-FFA500?style=for-the-badge&labelColor=000000&logo=shield)](https://github.com/DSCYBERS/AGENT-DS)
+
+### 🎮 **Battle Commands Arsenal**
+
+```
+    ┌─────────────────────────────────────────────────────────────────┐
+    │                      🎯 STRIKE COMMANDS                        │
+    │                                                                 │
+    │  🚀 DEMO MODE     │ python main_agent_ds.py --demo              │
+    │  ⚔️ FULL ASSAULT │ python main_agent_ds.py --target evil.com   │
+    │  🧠 AI OVERDRIVE │ python main_agent_ds.py --ai-mode quantum    │
+    │  🥷 GHOST MODE   │ python main_agent_ds.py --stealth-max        │
+    │  🌊 FLOOD ATTACK │ python main_agent_ds.py --multi-vector       │
+    │  🔥 NUKE MODE    │ python main_agent_ds.py --zero-day-hunt      │
+    │  🎭 CUSTOM CRAFT │ python main_agent_ds.py --payload-forge      │
+    │  📊 INTEL REPORT │ python main_agent_ds.py --generate-report    │
+    └─────────────────────────────────────────────────────────────────┘
+```
+
+### 🏆 **Mission Statistics** *(Last 24 Hours)*
+
+```
+    ┌─────────────────────────────────────────────────────────────────┐
+    │               🎯 GLOBAL WARFARE STATISTICS                     │
+    │                                                                 │
+    │  ⚔️ ACTIVE MISSIONS:    2,847     🏆 SUCCESS RATE:    97.3%    │
+    │  🎯 TARGETS SCANNED:   15,429     💀 EXPLOITS FOUND: 8,921     │
+    │  🧠 AI PREDICTIONS:    99.7%      🥷 STEALTH MODE:   100%      │
+    │  ⚡ AVG SCAN TIME:     2.3min     🔥 ZERO-DAYS:      37 new    │
+    │  🌊 CONCURRENT USERS:  1,247      📊 REPORTS GEN:   5,683     │
+    └─────────────────────────────────────────────────────────────────┘
+```
+
+</div>
+
+## 🎨 **Elite Neural Interface**
+
+### 💻 **Cyberpunk Command Center**
+
+```
+    ┌─────────────────────────────────────────────────────────────────┐
+    │                    🔮 NEURAL INTERFACE MATRIX                  │
+    │                                                                 │
+    │ ╔══════════════════════════════════════════════════════════════╗ │
+    │ ║  🚀 AGENT DS v2.0 - NEURAL WARFARE PLATFORM         [⚡]║ │
+    │ ╠══════════════════════════════════════════════════════════════╣ │
+    │ ║                                                              ║ │
+    │ ║  🎯 TARGET: evil-corp.com          STATUS: 🔥 BREACHED      ║ │
+    │ ║  🧠 AI CORE: QUANTUM OVERDRIVE     PHASE: 7/10 ⚡          ║ │
+    │ ║  ⚡ SPEED: LIGHTSPEED              FOUND: 47 VULNS 💀        ║ │
+    │ ║  🥷 STEALTH: GHOST PROTOCOL        EXPLOITS: 32 SUCCESS ⚔️  ║ │
+    │ ║                                                              ║ │
+    │ ║  ┌─────────────────────────────────────────────────────────┐ ║ │
+    │ ║  │ � [PHASE 7] NEURAL COMBAT ENGAGEMENT                  │ ║ │
+    │ ║  │ ├─ ✅ SQL FORTRESS BREACHED    [99% CRITICAL]          │ ║ │
+    │ ║  │ ├─ ⚡ XSS NEURAL STRIKE       [EXECUTING...]           │ ║ │
+    │ ║  │ ├─ 🎯 AUTH BYPASS QUANTUM     [WEAPONIZING...]         │ ║ │
+    │ ║  │ └─ 🔄 ZERO-DAY SYNTHESIS      [AI CRAFTING...]         │ ║ │
+    │ ║  └─────────────────────────────────────────────────────────┘ ║ │
+    │ ║                                                              ║ │
+    │ ║  📊 NEURAL POWER: [████████████████████████████████] 96%    ║ │
+    │ ║  🎯 PRECISION:    [███████████████████████████████ ] 99.7%  ║ │
+    │ ║  🔥 DESTRUCTION:  [████████████████████████████    ] 87%    ║ │
+    │ ║                                                              ║ │
+    │ ╚══════════════════════════════════════════════════════════════╝ │
+    └─────────────────────────────────────────────────────────────────┘
+```
+
+### 📊 **Elite Command Dashboard**
+
+```
+    ┌─────────────────────────────────────────────────────────────────┐
+    │                   🏆 CYBER WARFARE COMMAND CENTER              │
+    │                                                                 │
+    │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐ │
+    │  │  📈 BATTLE STATS│  │  🎯 TARGET GRID │  │  ⚡ POWER CORE  │ │
+    │  │                 │  │                 │  │                 │ │
+    │  │ • Missions: 847 │  │ • Active: 23    │  │ • CPU: 97%     │ │
+    │  │ • Success: 99%  │  │ • Breached: 19  │  │ • GPU: 89%     │ │
+    │  │ • Exploits:2.1K │  │ • Defended: 4   │  │ • RAM: 67%     │ │
+    │  │ • Zero-days: 37 │  │ • Unknown: 0    │  │ • AI: QUANTUM  │ │
+    │  └─────────────────┘  └─────────────────┘  └─────────────────┘ │
+    │                                                                 │
+    │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐ │
+    │  │ � WEAPON CACHE │  │ 🥷 STEALTH OPS  │  │ 🧠 AI NEURAL   │ │
+    │  │                 │  │                 │  │                 │ │
+    │  │ • SQL Inject+   │  │ • Ghost Mode    │  │ • Deep Learning │ │
+    │  │ • XSS Arsenal   │  │ • Proxy Chain   │  │ • Pattern Rec   │ │
+    │  │ • CSRF Bombs    │  │ • Traffic Mask  │  │ • Exploit Gen   │ │
+    │  │ • Zero-day Vault│  │ • Digital Ghost │  │ • Quantum Logic │ │
+    │  └─────────────────┘  └─────────────────┘  └─────────────────┘ │
+    └─────────────────────────────────────────────────────────────────┘
+```
+
+### 🌊 **Real-Time Neural Feed**
+
+<div align="center">
+
+```
+    ┌─────────────────────────────────────────────────────────────────┐
+    │                   🔥 LIVE NEURAL WARFARE FEED                  │
+    │                                                                 │
+    │ [23:47:12] 🎯 TARGET ACQUIRED: bank-evil.com                   │
+    │ [23:47:15] 🧠 AI ANALYZING... Neural patterns detected         │
+    │ [23:47:18] ⚡ VULNERABILITY FOUND: SQL Injection (Critical)     │
+    │ [23:47:21] 🔥 EXPLOIT CRAFTED: Quantum-Enhanced Payload        │
+    │ [23:47:24] 💀 BREACH SUCCESSFUL: Admin panel compromised       │
+    │ [23:47:27] 🥷 STEALTH MODE: Covering digital tracks           │
+    │ [23:47:30] 📊 INTEL GATHERED: 15GB sensitive data             │
+    │ [23:47:33] 🏆 MISSION COMPLETE: 47 vulnerabilities found       │
+    │ [23:47:36] 🔮 ZERO-DAY ALERT: New attack vector discovered     │
+    │ [23:47:39] ⚔️ NEXT TARGET: Loading quantum coordinates...      │
+    └─────────────────────────────────────────────────────────────────┘
+```
+
+**🎭 Choose Your Battle Style:**
+
+| 🎮 **Mode** | 🎯 **Target** | 🔥 **Power Level** | 🥷 **Stealth** |
+|:---:|:---:|:---:|:---:|
+| 🚀 **DEMO** | Safe Sandbox | ⚡⚡⚪⚪⚪ | 🥷🥷🥷🥷🥷 |
+| ⚔️ **ASSAULT** | Real Targets | ⚡⚡⚡⚡⚪ | 🥷🥷🥷⚪⚪ |
+| 🧠 **QUANTUM** | AI-Enhanced | ⚡⚡⚡⚡⚡ | 🥷🥷🥷🥷⚪ |
+| 🥷 **GHOST** | Stealth Mode | ⚡⚡⚡⚪⚪ | 🥷🥷🥷🥷🥷 |
+| 🔥 **NUKE** | Full Power | ⚡⚡⚡⚡⚡ | 🥷⚪⚪⚪⚪ |
+
+</div>
 │ • Tests: 1,247  │  │ • Web Apps: 15  │  │ • Speed: 75%↑   │
 │ • Vulns: 89     │  │ • Networks: 8   │  │ • Accuracy: 96% │
 │ • Critical: 12  │  │ • APIs: 23      │  │ • Uptime: 99.9% │
