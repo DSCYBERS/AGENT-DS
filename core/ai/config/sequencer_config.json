@@ -1,0 +1,204 @@
+{
+  "description": "Agent DS v2.0 - Adaptive Attack Sequencer Configuration",
+  "version": "2.0.0",
+  "sequencer_settings": {
+    "state_size": 50,
+    "action_size": 100,
+    "learning_rate": 0.001,
+    "epsilon_start": 1.0,
+    "epsilon_end": 0.01,
+    "epsilon_decay": 0.995,
+    "gamma": 0.99,
+    "batch_size": 32,
+    "memory_size": 10000,
+    "hidden_size": 512,
+    "target_update_freq": 100
+  },
+  "planning_algorithms": {
+    "mcts": {
+      "exploration_weight": 1.4,
+      "max_iterations": 1000,
+      "max_depth": 10,
+      "enable_by_default": true
+    },
+    "genetic_algorithm": {
+      "population_size": 50,
+      "mutation_rate": 0.1,
+      "crossover_rate": 0.8,
+      "elite_size": 5,
+      "generations": 100,
+      "enable_by_default": true
+    },
+    "dynamic_programming": {
+      "enable_resource_optimization": true,
+      "time_precision": 0.1,
+      "enable_by_default": true
+    }
+  },
+  "training_settings": {
+    "num_episodes": 1000,
+    "max_steps_per_episode": 50,
+    "save_frequency": 100,
+    "evaluation_frequency": 50,
+    "early_stopping_patience": 200,
+    "min_improvement": 0.001
+  },
+  "adaptation_settings": {
+    "online_learning_rate": 0.01,
+    "adaptation_threshold": 0.1,
+    "feedback_window_size": 100,
+    "real_time_adaptation": true,
+    "continuous_learning": true
+  },
+  "resource_management": {
+    "default_resources": {
+      "cpu_threads": 8.0,
+      "network_bandwidth": 100.0,
+      "memory": 1024.0,
+      "time_budget": 3600.0,
+      "concurrent_requests": 10.0
+    },
+    "resource_allocation_strategy": "proportional",
+    "resource_monitoring": true,
+    "dynamic_reallocation": true
+  },
+  "performance_settings": {
+    "track_performance": true,
+    "performance_history_size": 10000,
+    "analytics_update_frequency": 100,
+    "export_analytics": true,
+    "detailed_logging": false
+  },
+  "model_persistence": {
+    "models_directory": "./models",
+    "auto_save": true,
+    "save_frequency": 500,
+    "model_versioning": true,
+    "backup_models": true,
+    "max_model_versions": 5
+  },
+  "attack_phases": {
+    "reconnaissance": {
+      "max_time_budget": 600,
+      "priority_weight": 0.8,
+      "required_completion": 0.7
+    },
+    "enumeration": {
+      "max_time_budget": 900,
+      "priority_weight": 0.9,
+      "required_completion": 0.8
+    },
+    "vulnerability_scanning": {
+      "max_time_budget": 1200,
+      "priority_weight": 1.0,
+      "required_completion": 0.9
+    },
+    "exploitation": {
+      "max_time_budget": 1800,
+      "priority_weight": 1.2,
+      "required_completion": 0.6
+    },
+    "post_exploitation": {
+      "max_time_budget": 900,
+      "priority_weight": 1.1,
+      "required_completion": 0.5
+    },
+    "privilege_escalation": {
+      "max_time_budget": 600,
+      "priority_weight": 1.3,
+      "required_completion": 0.4
+    },
+    "persistence": {
+      "max_time_budget": 300,
+      "priority_weight": 0.7,
+      "required_completion": 0.3
+    },
+    "data_exfiltration": {
+      "max_time_budget": 600,
+      "priority_weight": 0.9,
+      "required_completion": 0.2
+    },
+    "cleanup": {
+      "max_time_budget": 300,
+      "priority_weight": 0.5,
+      "required_completion": 0.8
+    }
+  },
+  "attack_vectors": {
+    "sql_injection": {
+      "base_success_rate": 0.7,
+      "time_estimate": 2.0,
+      "risk_score": 0.6,
+      "resource_intensive": false
+    },
+    "xss": {
+      "base_success_rate": 0.6,
+      "time_estimate": 1.5,
+      "risk_score": 0.4,
+      "resource_intensive": false
+    },
+    "ssrf": {
+      "base_success_rate": 0.5,
+      "time_estimate": 3.0,
+      "risk_score": 0.7,
+      "resource_intensive": true
+    },
+    "directory_traversal": {
+      "base_success_rate": 0.6,
+      "time_estimate": 1.0,
+      "risk_score": 0.5,
+      "resource_intensive": false
+    },
+    "command_injection": {
+      "base_success_rate": 0.8,
+      "time_estimate": 2.5,
+      "risk_score": 0.9,
+      "resource_intensive": true
+    },
+    "file_upload": {
+      "base_success_rate": 0.4,
+      "time_estimate": 4.0,
+      "risk_score": 0.8,
+      "resource_intensive": true
+    },
+    "authentication_bypass": {
+      "base_success_rate": 0.3,
+      "time_estimate": 5.0,
+      "risk_score": 0.7,
+      "resource_intensive": false
+    },
+    "privilege_escalation": {
+      "base_success_rate": 0.2,
+      "time_estimate": 8.0,
+      "risk_score": 0.9,
+      "resource_intensive": true
+    },
+    "brute_force": {
+      "base_success_rate": 0.3,
+      "time_estimate": 10.0,
+      "risk_score": 0.5,
+      "resource_intensive": true
+    },
+    "social_engineering": {
+      "base_success_rate": 0.4,
+      "time_estimate": 15.0,
+      "risk_score": 0.3,
+      "resource_intensive": false
+    }
+  },
+  "optimization_strategies": {
+    "default_strategy": "adaptive",
+    "fallback_strategy": "heuristic",
+    "time_based_switching": true,
+    "performance_based_switching": true,
+    "strategy_switch_threshold": 0.2
+  },
+  "logging": {
+    "log_level": "INFO",
+    "log_file": "sequencer.log",
+    "detailed_performance_logs": false,
+    "debug_mode": false,
+    "log_rotation": true,
+    "max_log_size": "10MB"
+  }
+}

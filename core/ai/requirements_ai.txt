@@ -1,0 +1,52 @@
+# Agent DS v2.0 - AI Component Requirements
+# ==========================================
+
+# Core ML/AI Dependencies
+numpy>=1.21.0
+torch>=1.12.0
+transformers>=4.20.0
+scikit-learn>=1.1.0
+pandas>=1.4.0
+
+# Reinforcement Learning for Attack Sequencer
+gym>=0.21.0
+stable-baselines3>=1.5.0
+tensorboard>=2.8.0
+
+# Advanced Optimization
+scipy>=1.8.0
+networkx>=2.8.0
+cvxpy>=1.2.0
+
+# Optional Advanced ML
+tensorflow>=2.8.0
+keras>=2.8.0
+xgboost>=1.6.0
+lightgbm>=3.3.0
+
+# NLP and Text Processing
+nltk>=3.7
+spacy>=3.4.0
+gensim>=4.2.0
+
+# Neural Network Utilities
+tensorboard>=2.8.0
+torchvision>=0.13.0
+torchtext>=0.13.0
+
+# Data Processing
+scipy>=1.8.0
+matplotlib>=3.5.0
+seaborn>=0.11.0
+
+# GPU Support (Optional)
+# torch-audio>=0.12.0  # Uncomment if audio processing needed
+# cuda-toolkit>=11.6   # Uncomment for CUDA support
+
+# Model Optimization
+onnx>=1.12.0
+onnxruntime>=1.12.0
+
+# Distributed Computing (Optional)
+# ray>=2.0.0           # Uncomment for distributed training
+# dask>=2022.6.0       # Uncomment for distributed data processing
