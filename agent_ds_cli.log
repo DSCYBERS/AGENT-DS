@@ -1,0 +1,36 @@
+2025-09-17 15:26:52,791 - InteractiveCLI - WARNING - Terminal interface not available
+2025-09-17 15:26:52,794 - CompleteAIIntegrationSystem - INFO - Starting intelligent penetration test for https://httpbin.org/get
+2025-09-17 15:26:52,794 - AICoordinationManager - INFO - Executing mission phase: reconnaissance
+2025-09-17 15:26:52,910 - AICoordinationManager - INFO - AI recommends stopping mission after reconnaissance
+2025-09-17 15:26:52,913 - CompleteAIIntegrationSystem - INFO - Starting intelligent penetration test for invalid-url
+2025-09-17 15:26:52,914 - AICoordinationManager - INFO - Executing mission phase: reconnaissance
+2025-09-17 15:26:53,021 - AICoordinationManager - INFO - AI recommends stopping mission after reconnaissance
+2025-09-17 15:29:41,943 - InteractiveCLI - WARNING - Terminal interface not available
+2025-09-17 15:29:41,945 - CompleteAIIntegrationSystem - INFO - Starting intelligent penetration test for https://httpbin.org/get
+2025-09-17 15:29:41,946 - AICoordinationManager - INFO - Executing mission phase: reconnaissance
+2025-09-17 15:29:42,054 - AICoordinationManager - INFO - AI recommends stopping mission after reconnaissance
+2025-09-17 15:29:42,055 - CompleteAIIntegrationSystem - INFO - Starting intelligent penetration test for invalid-url
+2025-09-17 15:29:42,056 - AICoordinationManager - INFO - Executing mission phase: reconnaissance
+2025-09-17 15:29:42,160 - AICoordinationManager - INFO - AI recommends stopping mission after reconnaissance
+2025-09-17 15:35:59,560 - InteractiveCLI - WARNING - Terminal interface not available
+2025-09-17 15:35:59,571 - CompleteAIIntegrationSystem - INFO - Starting intelligent penetration test for https://httpbin.org/get
+2025-09-17 15:35:59,571 - AICoordinationManager - INFO - Executing mission phase: reconnaissance
+2025-09-17 15:35:59,674 - AICoordinationManager - INFO - AI recommends stopping mission after reconnaissance
+2025-09-17 15:35:59,677 - CompleteAIIntegrationSystem - INFO - Starting intelligent penetration test for invalid-url
+2025-09-17 15:35:59,677 - AICoordinationManager - INFO - Executing mission phase: reconnaissance
+2025-09-17 15:35:59,779 - AICoordinationManager - INFO - AI recommends stopping mission after reconnaissance
+2025-09-17 15:37:14,515 - InteractiveCLI - WARNING - Terminal interface not available
+2025-09-17 15:37:14,523 - CompleteAIIntegrationSystem - INFO - Starting intelligent penetration test for https://httpbin.org/get
+2025-09-17 15:37:14,523 - AICoordinationManager - INFO - Executing mission phase: reconnaissance
+2025-09-17 15:37:14,625 - AICoordinationManager - INFO - AI recommends stopping mission after reconnaissance
+2025-09-17 15:37:14,628 - CompleteAIIntegrationSystem - INFO - Starting intelligent penetration test for invalid-url
+2025-09-17 15:37:14,629 - AICoordinationManager - INFO - Executing mission phase: reconnaissance
+2025-09-17 15:37:14,736 - AICoordinationManager - INFO - AI recommends stopping mission after reconnaissance
+2025-09-17 15:39:12,032 - InteractiveCLI - WARNING - Terminal interface not available
+2025-09-17 15:39:12,035 - CompleteAIIntegrationSystem - INFO - Starting intelligent penetration test for https://httpbin.org/get
+2025-09-17 15:39:12,035 - AICoordinationManager - INFO - Executing mission phase: reconnaissance
+2025-09-17 15:39:12,137 - AICoordinationManager - INFO - AI recommends stopping mission after reconnaissance
+2025-09-17 15:39:12,139 - CompleteAIIntegrationSystem - INFO - Starting intelligent penetration test for invalid-url
+2025-09-17 15:39:12,139 - AICoordinationManager - INFO - Executing mission phase: reconnaissance
+2025-09-17 15:39:12,244 - AICoordinationManager - INFO - AI recommends stopping mission after reconnaissance
+2025-09-17 16:36:21,801 - InteractiveCLI - WARNING - Terminal interface not available
