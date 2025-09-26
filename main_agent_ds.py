@@ -655,6 +655,11 @@ class AgentDSMasterInterface:
 
 [bold bright_green]Thank you for using Agent DS v2.0! 🚀[/bold bright_green]
 """
+            # Save report to HTML file
+            report_filename = f"agent_ds_report_{self.mission_id}.html"
+            with open(report_filename, "w", encoding="utf-8") as f:
+                f.write(results_text)
+            print(f"Report saved to: {report_filename}")
         
         results_panel = Panel(
             Align.center(results_text),
