@@ -20,6 +20,7 @@ All badges above are live — they pull from the GitHub API rather than being ha
 - [Project status](#project-status)
 - [Legal notice](#legal-notice)
 - [Architecture](#architecture)
+- [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Methodology phases](#methodology-phases)
@@ -84,6 +85,34 @@ This project is intended **for authorized security testing only** — systems yo
             │                        │   orchestrates
             └───────────────────────┘
 ```
+
+## Features
+
+Grouped by area. Status markers match the [Project status](#project-status) section above — ✅ means wired and runnable today, 🚧 means the code exists but isn't yet invoked end-to-end by the main phase loop.
+
+**Scope & safety controls**
+- ✅ Target validation for URL, domain, IP address, and CIDR range input
+- ✅ Mandatory authorization gate — a run will not start without explicit confirmation
+- ✅ Allowed-domain allowlist, checked against the target before anything executes
+- ✅ Mission attribution (company name, operator name, mission ID) recorded per run
+
+**AI coordination layer** (`core/attacks/complete_ai_integration.py`)
+- 🚧 Mission-context model carrying target URL/IP, detected technologies, CMS type, WAF presence, web server, database type, open ports, and admin panels between phases
+- 🚧 Coordinated multi-phase execution (reconnaissance → vulnerability discovery → exploitation) through a dedicated coordination manager
+- 🚧 Module enhancer for layering AI-assisted logic onto individual attack modules
+- ✅ Optional AlienVault OTX threat-intelligence enrichment via API key
+
+**Attack surface** (modules orchestrated by `core/`)
+- 🚧 Web application testing — SQL injection, XSS, authentication bypass
+- 🚧 Database fingerprinting and exploitation
+- 🚧 Admin-panel discovery and credential testing
+- 🚧 Privilege-escalation and persistence checks
+
+**Terminal experience**
+- ✅ Live Rich-based dashboard — phase table, elapsed time, mission ID, real-time stats panel
+- ✅ Fully flag-driven, non-interactive usage for scripted or CI runs
+- ✅ Demo and status modes for exploring the CLI without a live target
+- ✅ HTML report written out at the end of a run
 
 ## Installation
 
