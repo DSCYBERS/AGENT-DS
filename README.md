@@ -24,6 +24,8 @@ All badges above are live — they pull from the GitHub API rather than being ha
 - [Installation](#installation)
 - [Usage](#usage)
 - [Methodology phases](#methodology-phases)
+- [Attack flow](#attack-flow)
+- [Attack categories](#attack-categories)
 - [Project structure](#project-structure)
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
@@ -177,6 +179,41 @@ python main_agent_ds.py --status
 | 8 | Privilege Escalation | Local privesc, kernel/service checks |
 | 9 | Persistence Testing | Backdoor and persistence-mechanism checks |
 | 10 | Reporting | HTML report generation |
+
+## Attack flow
+
+This mirrors the actual control flow in `main_agent_ds.py`: phases run strictly in sequence, gated by the authorization/scope-guard check at startup. There's no branching on findings yet — see [Roadmap](#roadmap).
+
+```mermaid
+flowchart TD
+    Start([CLI launched]) --> Auth{Authorization +<br/>scope-guard confirmed?}
+    Auth -- No --> Exit([Exit — not authorized])
+    Auth -- Yes --> P1[1 . Initialization]
+    P1 --> P2[2 . Reconnaissance]
+    P2 --> P3[3 . Vulnerability Analysis]
+    P3 --> P4[4 . Web Exploitation]
+    P4 --> P5[5 . Database Exploitation]
+    P5 --> P6[6 . Admin Access Testing]
+    P6 --> P7[7 . AI-Adaptive Attacks]
+    P7 --> P8[8 . Privilege Escalation]
+    P8 --> P9[9 . Persistence Testing]
+    P9 --> P10[10 . Reporting]
+    P10 --> End([HTML report written])
+```
+
+## Attack categories
+
+Conceptual summaries of what each phase class tests for — written at the same level as the OWASP Top 10 / PTES methodology, for anyone reading this repo who wants to understand the scope of testing without digging through source. These are definitions, not instructions: no payloads, bypass techniques, or exploitation steps are included here or anywhere else in this repo's documentation.
+
+| Category | What it tests for |
+|---|---|
+| **SQL Injection** | Whether user-supplied input reaches a database query without proper sanitization or parameterization, which could let attacker-controlled input alter the query's logic. |
+| **Cross-Site Scripting (XSS)** | Whether input is reflected into page HTML/JS without proper encoding, which could let a script execute in another user's browser session. Covers reflected, stored, and DOM-based variants at a detection level. |
+| **Authentication Bypass** | Whether login, session, or access-control logic could be satisfied without valid credentials — e.g. weak session handling, predictable tokens, or flawed authorization checks. |
+| **Database Exploitation** | Given an identified weakness (such as an injection point or weak credential), how much of the underlying database it could actually expose. |
+| **Admin-Panel / Credential Testing** | Whether administrative interfaces are discoverable and whether they rely on default or easily-guessed credentials — one of the most common real-world findings in otherwise well-built applications. |
+| **Privilege Escalation** | Whether a lower-privileged account or process could reach higher privileges through misconfiguration (service permissions, outdated components, insecure defaults) rather than a fresh vulnerability. |
+| **Persistence Testing** | Whether mechanisms exist (scheduled tasks, startup entries, service installs) that would let access survive a reboot or session reset — standard in a full assessment, to answer "if this were missed, how long would an intruder stay." |
 
 ## Project structure
 
