@@ -24,6 +24,7 @@ from typing import Dict, List, Optional, Any, Tuple, Union
 from dataclasses import dataclass, field
 from enum import Enum
 import uuid
+from urllib.parse import urlparse
 
 # Import AI components
 try:
@@ -338,11 +339,36 @@ class AICoreIntegrationManager:
         
         if self.recon_engine:
             try:
-                # Basic reconnaissance
-                basic_recon = await self._execute_module_with_ai(
-                    self.recon_engine, 'comprehensive_recon', 
-                    target_url=self.current_mission.target_url
-                )
+                basic_recon = {}
+                recon_methods = [
+                    'comprehensive_recon',
+                    'perform_advanced_enumeration',
+                    'perform_reconnaissance'
+                ]
+                for method_name in recon_methods:
+                    if hasattr(self.recon_engine, method_name):
+                        basic_recon = await self._execute_module_with_ai(
+                            self.recon_engine,
+                            method_name,
+                            target_url=self.current_mission.target_url
+                        )
+                        if basic_recon:
+                            break
+
+                if not basic_recon:
+                    parsed = urlparse(self.current_mission.target_url)
+                    basic_recon = {
+                        'target': self.current_mission.target_url,
+                        'domain': parsed.netloc,
+                        'technologies': [],
+                        'crawled_urls': []
+                    }
+
+                # Normalize endpoint keys expected by planners
+                crawled = basic_recon.get('crawled_urls', [])
+                endpoints = basic_recon.get('endpoints', [])
+                if not endpoints and isinstance(crawled, list):
+                    basic_recon['endpoints'] = crawled[:200]
                 
                 # AI-enhanced analysis
                 if self.ai_thinking_model:
@@ -351,6 +377,7 @@ class AICoreIntegrationManager:
                 
                 recon_results = basic_recon
                 self.current_mission.target_info.update(recon_results)
+                self.current_mission.discovered_endpoints = recon_results.get('endpoints', [])
                 
                 if self.terminal_callback:
                     self.terminal_callback(f"✅ Reconnaissance: {len(recon_results.get('endpoints', []))} endpoints found", "success")
@@ -411,8 +438,9 @@ class AICoreIntegrationManager:
         
         for i, action in enumerate(attack_sequence, 1):
             try:
+                action_vector_name = self._vector_to_string(self._get_action_field(action, 'vector', None))
                 if self.terminal_callback:
-                    self.terminal_callback(f"🎯 Executing {i}/{len(attack_sequence)}: {action.vector.value}", "info")
+                    self.terminal_callback(f"🎯 Executing {i}/{len(attack_sequence)}: {action_vector_name}", "info")
                 
                 # Execute attack with AI coordination
                 result = await self._execute_ai_coordinated_attack_action(action)
@@ -424,14 +452,14 @@ class AICoreIntegrationManager:
                     )
                 
                 # Update results
-                if result.success:
+                if self._get_result_field(result, 'success', False):
                     execution_results['successful_attacks'] += 1
                     if self.terminal_callback:
-                        self.terminal_callback(f"✅ {action.vector.value}: SUCCESS", "success")
+                        self.terminal_callback(f"✅ {action_vector_name}: SUCCESS", "success")
                 else:
                     execution_results['failed_attacks'] += 1
                     if self.terminal_callback:
-                        self.terminal_callback(f"❌ {action.vector.value}: FAILED", "error")
+                        self.terminal_callback(f"❌ {action_vector_name}: FAILED", "error")
                 
                 execution_results['attack_details'].append({
                     'action': action,
@@ -458,36 +486,37 @@ class AICoreIntegrationManager:
     
     async def _execute_ai_coordinated_attack_action(self, action: AttackAction) -> AttackResult:
         """Execute a single attack action with AI coordination"""
-        
-        # Determine which module to use
-        module_map = {
-            AttackVector.SQL_INJECTION: self.web_attack_engine,
-            AttackVector.XSS: self.web_attack_engine,
-            AttackVector.SSRF: self.web_attack_engine,
-            AttackVector.DIRECTORY_TRAVERSAL: self.web_attack_engine,
-            AttackVector.COMMAND_INJECTION: self.web_attack_engine,
-            AttackVector.FILE_UPLOAD: self.web_attack_engine,
-            AttackVector.AUTHENTICATION_BYPASS: self.admin_login_tester,
-            AttackVector.BRUTE_FORCE: self.admin_login_tester
-        }
-        
-        module = module_map.get(action.vector)
+        vector = self._get_action_field(action, 'vector', None)
+        vector_name = self._vector_to_string(vector)
+
+        web_vectors = {'sql_injection', 'xss', 'ssrf', 'directory_traversal', 'command_injection', 'file_upload'}
+        auth_vectors = {'authentication_bypass', 'brute_force'}
+
+        if vector_name in web_vectors:
+            module = self.web_attack_engine
+        elif vector_name in auth_vectors:
+            module = self.admin_login_tester
+        else:
+            module = self.db_exploit_engine or self.web_attack_engine
+
         if not module:
-            raise ValueError(f"No module available for attack vector: {action.vector}")
+            raise ValueError(f"No module available for attack vector: {vector_name}")
         
         # Generate AI-enhanced payload if needed
-        if action.payload == "AI_GENERATE":
+        if self._get_action_field(action, 'payload', '') == "AI_GENERATE":
             enhanced_payloads = await self._generate_ai_payload_for_action(action)
             if enhanced_payloads:
-                action.payload = enhanced_payloads[0].payload
+                first_payload = enhanced_payloads[0]
+                payload_value = getattr(first_payload, 'payload', first_payload)
+                self._set_action_field(action, 'payload', payload_value)
         
         # Execute attack using appropriate module
         start_time = time.time()
         
         try:
-            if action.vector in [AttackVector.SQL_INJECTION, AttackVector.XSS, AttackVector.SSRF]:
+            if vector_name in {'sql_injection', 'xss', 'ssrf', 'directory_traversal', 'command_injection', 'file_upload'}:
                 result_data = await self._execute_web_attack(module, action)
-            elif action.vector in [AttackVector.AUTHENTICATION_BYPASS, AttackVector.BRUTE_FORCE]:
+            elif vector_name in {'authentication_bypass', 'brute_force'}:
                 result_data = await self._execute_auth_attack(module, action)
             else:
                 result_data = await self._execute_generic_attack(module, action)
@@ -526,14 +555,19 @@ class AICoreIntegrationManager:
         try:
             from core.ai import PayloadType, TargetContext
             
-            # Map attack vector to payload type
+            vector_name = self._vector_to_string(self._get_action_field(action, 'vector', None))
+
+            sql_payload_type = getattr(PayloadType, 'SQL_INJECTION', None)
+            xss_payload_type = getattr(PayloadType, 'XSS', None)
+            ssrf_payload_type = getattr(PayloadType, 'SSRF', None)
+
             payload_type_map = {
-                AttackVector.SQL_INJECTION: PayloadType.SQL_INJECTION,
-                AttackVector.XSS: PayloadType.XSS,
-                AttackVector.SSRF: PayloadType.SSRF
+                'sql_injection': sql_payload_type,
+                'xss': xss_payload_type,
+                'ssrf': ssrf_payload_type
             }
             
-            payload_type = payload_type_map.get(action.vector)
+            payload_type = payload_type_map.get(vector_name)
             if not payload_type:
                 return []
             
@@ -653,28 +687,293 @@ class AICoreIntegrationManager:
     
     async def _generate_attack_actions_from_recon(self, recon_results: Dict[str, Any]) -> List[AttackAction]:
         """Generate attack actions based on reconnaissance results"""
-        actions = []
-        
-        # This would analyze recon results and generate appropriate attack actions
-        # For now, return empty list as placeholder
-        
-        return actions
+        actions: List[AttackAction] = []
+
+        endpoints = recon_results.get('endpoints') or recon_results.get('crawled_urls') or []
+        if not endpoints:
+            target = self.current_mission.target_url if self.current_mission else ""
+            endpoints = [target] if target else []
+
+        technologies = [str(t).lower() for t in (recon_results.get('technologies') or [])]
+        security_headers = recon_results.get('security_headers') or {}
+
+        has_csp = bool(security_headers.get('Content-Security-Policy'))
+        has_sql_stack = any(
+            db_tech in technologies for db_tech in
+            ('mysql', 'postgresql', 'postgres', 'mariadb', 'mssql', 'sql server', 'oracle', 'php')
+        )
+        has_template_stack = any(
+            tmpl in technologies for tmpl in ('django', 'flask', 'jinja', 'twig', 'smarty')
+        )
+
+        for endpoint in endpoints[:120]:
+            endpoint_str = str(endpoint)
+            lower_ep = endpoint_str.lower()
+
+            is_dynamic = any(marker in lower_ep for marker in ['?', '=', '&', '/api/', '.php', '.asp', '.aspx', '.jsp'])
+            is_auth = any(marker in lower_ep for marker in ['/login', '/signin', '/auth', '/admin'])
+            is_upload = any(marker in lower_ep for marker in ['/upload', '/import', '/avatar', '/file'])
+            has_file_path = any(marker in lower_ep for marker in ['/download', '/file', '/view', '/template'])
+            has_external_fetch = any(marker in lower_ep for marker in ['url=', 'redirect', 'proxy', 'fetch', 'callback'])
+            has_exec_surface = any(marker in lower_ep for marker in ['cmd', 'exec', 'shell', 'ping', 'system'])
+            high_value = any(marker in lower_ep for marker in ['/admin', '/api', '/dashboard', '/manage'])
+
+            if is_dynamic or has_sql_stack:
+                action = self._build_attack_action(
+                    vector_name='sql_injection',
+                    target_endpoint=endpoint_str,
+                    priority=0.82 if has_sql_stack else 0.72,
+                    success_probability=0.68 if has_sql_stack else 0.55,
+                    risk_score=0.88,
+                    metadata={'pattern': 'advanced_sqli', 'high_value_endpoint': high_value}
+                )
+                if action:
+                    actions.append(action)
+
+            if is_dynamic:
+                action = self._build_attack_action(
+                    vector_name='xss',
+                    target_endpoint=endpoint_str,
+                    priority=0.70 if not has_csp else 0.58,
+                    success_probability=0.60 if not has_csp else 0.45,
+                    risk_score=0.60,
+                    metadata={'pattern': 'contextual_xss', 'high_value_endpoint': high_value}
+                )
+                if action:
+                    actions.append(action)
+
+            if has_external_fetch:
+                action = self._build_attack_action(
+                    vector_name='ssrf',
+                    target_endpoint=endpoint_str,
+                    priority=0.78,
+                    success_probability=0.50,
+                    risk_score=0.83,
+                    metadata={'pattern': 'cloud_metadata_ssrf', 'high_value_endpoint': high_value}
+                )
+                if action:
+                    actions.append(action)
+
+            if has_file_path:
+                action = self._build_attack_action(
+                    vector_name='directory_traversal',
+                    target_endpoint=endpoint_str,
+                    priority=0.74,
+                    success_probability=0.52,
+                    risk_score=0.75,
+                    metadata={'pattern': 'path_traversal_lfi', 'high_value_endpoint': high_value}
+                )
+                if action:
+                    actions.append(action)
+
+            if has_exec_surface:
+                action = self._build_attack_action(
+                    vector_name='command_injection',
+                    target_endpoint=endpoint_str,
+                    priority=0.80,
+                    success_probability=0.46,
+                    risk_score=0.90,
+                    metadata={'pattern': 'os_command_injection', 'high_value_endpoint': high_value}
+                )
+                if action:
+                    actions.append(action)
+
+            if is_upload:
+                action = self._build_attack_action(
+                    vector_name='file_upload',
+                    target_endpoint=endpoint_str,
+                    priority=0.76,
+                    success_probability=0.51,
+                    risk_score=0.86,
+                    metadata={'pattern': 'polyglot_upload', 'high_value_endpoint': high_value}
+                )
+                if action:
+                    actions.append(action)
+
+            if is_auth:
+                auth_action = self._build_attack_action(
+                    vector_name='authentication_bypass',
+                    target_endpoint=endpoint_str,
+                    priority=0.81,
+                    success_probability=0.43,
+                    risk_score=0.84,
+                    metadata={'pattern': 'auth_logic_bypass', 'high_value_endpoint': True}
+                )
+                brute_action = self._build_attack_action(
+                    vector_name='brute_force',
+                    target_endpoint=endpoint_str,
+                    priority=0.63,
+                    success_probability=0.35,
+                    risk_score=0.58,
+                    metadata={'pattern': 'credential_stuffing', 'high_value_endpoint': True}
+                )
+                if auth_action:
+                    actions.append(auth_action)
+                if brute_action:
+                    actions.append(brute_action)
+
+            if has_template_stack and is_dynamic:
+                action = self._build_attack_action(
+                    vector_name='command_injection',
+                    target_endpoint=endpoint_str,
+                    priority=0.67,
+                    success_probability=0.38,
+                    risk_score=0.72,
+                    metadata={'pattern': 'ssti_to_rce_path', 'high_value_endpoint': high_value}
+                )
+                if action:
+                    actions.append(action)
+
+        # De-duplicate by vector+endpoint and keep highest-priority variant
+        deduped: Dict[Tuple[str, str], AttackAction] = {}
+        for action in actions:
+            vector_name = self._vector_to_string(self._get_action_field(action, 'vector', None))
+            endpoint = str(self._get_action_field(action, 'target_endpoint', ''))
+            key = (vector_name, endpoint)
+            existing = deduped.get(key)
+            if not existing:
+                deduped[key] = action
+                continue
+
+            if self._get_action_field(action, 'priority', 0.0) > self._get_action_field(existing, 'priority', 0.0):
+                deduped[key] = action
+
+        return self._create_heuristic_sequence(list(deduped.values()))
     
     def _create_heuristic_sequence(self, actions: List[AttackAction]) -> List[AttackAction]:
         """Create heuristic attack sequence when AI sequencer not available"""
         # Sort by priority and success probability
-        return sorted(actions, key=lambda a: (a.priority, a.success_probability), reverse=True)
-    
+        return sorted(
+            actions,
+            key=lambda a: (
+                self._get_action_field(a, 'priority', 0.0),
+                self._get_action_field(a, 'success_probability', 0.0)
+            ),
+            reverse=True
+        )
+
     async def _adapt_sequence_realtime(self, remaining_sequence: List[AttackAction], last_result: AttackResult) -> List[AttackAction]:
         """Adapt remaining sequence based on last result"""
-        if self.attack_sequencer:
-            try:
-                # Use AI to adapt sequence
-                return remaining_sequence  # Placeholder
-            except Exception as e:
-                self.logger.error(f"Sequence adaptation failed: {e}")
-        
-        return remaining_sequence
+        if not remaining_sequence:
+            return remaining_sequence
+
+        try:
+            last_success = self._get_result_field(last_result, 'success', False)
+            last_action = self._get_result_field(last_result, 'action', None)
+            last_vector = self._vector_to_string(self._get_action_field(last_action, 'vector', None))
+
+            adapted = []
+            for action in remaining_sequence:
+                priority = float(self._get_action_field(action, 'priority', 0.0))
+                vector_name = self._vector_to_string(self._get_action_field(action, 'vector', None))
+                metadata = self._get_action_field(action, 'metadata', {}) or {}
+
+                if last_success and vector_name == last_vector:
+                    priority += 0.15
+                elif (not last_success) and vector_name == last_vector:
+                    priority -= 0.20
+
+                if metadata.get('high_value_endpoint'):
+                    priority += 0.05
+
+                self._set_action_field(action, 'priority', max(0.05, min(1.0, priority)))
+                adapted.append(action)
+
+            return self._create_heuristic_sequence(adapted)
+
+        except Exception as e:
+            self.logger.error(f"Sequence adaptation failed: {e}")
+            return remaining_sequence
+
+    def _vector_to_string(self, vector: Any) -> str:
+        """Normalize attack vector to string"""
+        if vector is None:
+            return ""
+        return vector.value if hasattr(vector, 'value') else str(vector)
+
+    def _get_action_field(self, action: Any, field_name: str, default: Any = None) -> Any:
+        """Read action field from dataclass/object/dict"""
+        if action is None:
+            return default
+        if isinstance(action, dict):
+            return action.get(field_name, default)
+        return getattr(action, field_name, default)
+
+    def _set_action_field(self, action: Any, field_name: str, value: Any):
+        """Set action field on dataclass/object/dict"""
+        if action is None:
+            return
+        if isinstance(action, dict):
+            action[field_name] = value
+            return
+        setattr(action, field_name, value)
+
+    def _get_result_field(self, result: Any, field_name: str, default: Any = None) -> Any:
+        """Read result field from dataclass/object/dict"""
+        if result is None:
+            return default
+        if isinstance(result, dict):
+            return result.get(field_name, default)
+        return getattr(result, field_name, default)
+
+    def _resolve_attack_vector(self, vector_name: str) -> Optional[Any]:
+        """Resolve vector constant from name across enum/fallback types"""
+        if not vector_name:
+            return None
+
+        if hasattr(AttackVector, '__members__'):
+            return AttackVector.__members__.get(vector_name.upper())
+
+        attr_name = vector_name.upper()
+        return getattr(AttackVector, attr_name, None)
+
+    def _resolve_attack_phase(self, phase_name: str) -> Optional[Any]:
+        """Resolve attack phase constant from name across enum/fallback types"""
+        if not phase_name:
+            return None
+
+        if hasattr(AttackPhase, '__members__'):
+            return AttackPhase.__members__.get(phase_name.upper())
+
+        attr_name = phase_name.upper()
+        return getattr(AttackPhase, attr_name, None)
+
+    def _build_attack_action(
+        self,
+        vector_name: str,
+        target_endpoint: str,
+        priority: float,
+        success_probability: float,
+        risk_score: float,
+        metadata: Optional[Dict[str, Any]] = None
+    ) -> Optional[AttackAction]:
+        """Create AttackAction that works with both dataclass and fallback dict implementation"""
+        vector = self._resolve_attack_vector(vector_name)
+        phase = self._resolve_attack_phase("EXPLOITATION") or self._resolve_attack_phase("RECONNAISSANCE")
+        if not vector or not phase:
+            return None
+
+        resource_requirements = {}
+        cpu_key = getattr(ResourceType, 'CPU_THREADS', None)
+        memory_key = getattr(ResourceType, 'MEMORY', None)
+        if cpu_key is not None:
+            resource_requirements[cpu_key] = 1.0
+        if memory_key is not None:
+            resource_requirements[memory_key] = 0.2
+
+        return AttackAction(
+            vector=vector,
+            phase=phase,
+            target_endpoint=target_endpoint,
+            payload="AI_GENERATE",
+            priority=max(0.05, min(1.0, float(priority))),
+            estimated_time=30.0,
+            resource_requirements=resource_requirements,
+            success_probability=max(0.05, min(1.0, float(success_probability))),
+            risk_score=max(0.05, min(1.0, float(risk_score))),
+            dependencies=[],
+            metadata=metadata or {}
+        )
     
     async def _generate_ai_mission_report(self, execution_results: Dict[str, Any]) -> Dict[str, Any]:
         """Generate AI-enhanced mission report"""
