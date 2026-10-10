@@ -320,7 +320,13 @@ class AIThinkingModel:
             'cve_matches': [],
             'exploit_availability': [],
             'threat_actor_ttps': [],
-            'recent_vulnerabilities': []
+            'recent_vulnerabilities': [],
+            'otx_context': {
+                'enabled': False,
+                'pulses': [],
+                'ioc_samples': [],
+                'recommended_focus_areas': []
+            }
         }
         
         # Search for CVEs related to detected technologies
@@ -333,8 +339,104 @@ class AIThinkingModel:
         # Check for recent high-impact vulnerabilities
         recent_vulns = await self._get_recent_vulnerabilities()
         intel['recent_vulnerabilities'] = recent_vulns
+
+        # Pull defensive threat context from OTX / open-source feeds (no exploit payload ingestion)
+        otx_context = await self._fetch_otx_threat_context(target_analysis)
+        intel['otx_context'] = otx_context
+        if otx_context.get('recommended_focus_areas'):
+            intel['threat_actor_ttps'].extend(otx_context['recommended_focus_areas'])
         
         return intel
+
+    async def _fetch_otx_threat_context(self, target_analysis: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Fetch high-level threat context from AlienVault OTX.
+        Only imports indicators and testing focus areas; does not import exploit payloads.
+        """
+        context = {
+            'enabled': False,
+            'pulses': [],
+            'ioc_samples': [],
+            'recommended_focus_areas': []
+        }
+
+        otx_key = os.getenv('OTX_API_KEY', '').strip()
+        if not otx_key:
+            return context
+
+        tags = self._extract_intel_tags(target_analysis)[:3]
+        if not tags:
+            return context
+
+        try:
+            headers = {'X-OTX-API-KEY': otx_key, 'User-Agent': 'AgentDS/2.0'}
+            base_url = self.threat_intel_sources.get('otx_api', 'https://otx.alienvault.com/api/v1').rstrip('/')
+
+            for tag in tags:
+                url = f"{base_url}/search/pulses"
+                response = requests.get(url, params={'q': tag, 'limit': 3}, headers=headers, timeout=8, verify=False)
+                if response.status_code != 200:
+                    continue
+
+                payload = response.json() if response.content else {}
+                pulses = payload.get('results', []) or []
+                for pulse in pulses[:3]:
+                    pulse_name = pulse.get('name', '')
+                    pulse_tags = pulse.get('tags', []) or []
+                    indicators = pulse.get('indicators', []) or []
+
+                    context['pulses'].append({
+                        'name': pulse_name,
+                        'created': pulse.get('created', ''),
+                        'adversary': pulse.get('adversary', ''),
+                        'references_count': len(pulse.get('references', []) or []),
+                        'tags': pulse_tags[:6]
+                    })
+
+                    for indicator in indicators[:4]:
+                        indicator_type = indicator.get('type', '')
+                        if indicator_type in {'IPv4', 'domain', 'hostname', 'URL', 'FileHash-SHA256'}:
+                            context['ioc_samples'].append({
+                                'type': indicator_type,
+                                'value': indicator.get('indicator', '')
+                            })
+
+                    focus_map = {
+                        'credential': 'credential-hardening-and-auth-logic',
+                        'phishing': 'email-and-session-security-validation',
+                        'c2': 'egress-filtering-and-ssrf-controls',
+                        'rce': 'input-validation-and-command-execution-controls',
+                        'sql': 'parameterized-queries-and-db-hardening'
+                    }
+                    for token, focus in focus_map.items():
+                        if token in (pulse_name + " " + " ".join(pulse_tags)).lower():
+                            context['recommended_focus_areas'].append(focus)
+
+            if context['pulses']:
+                context['enabled'] = True
+                context['recommended_focus_areas'] = sorted(set(context['recommended_focus_areas']))
+                context['ioc_samples'] = context['ioc_samples'][:20]
+
+        except Exception as e:
+            print(f"OTX threat context fetch failed: {e}")
+
+        return context
+
+    def _extract_intel_tags(self, target_analysis: Dict[str, Any]) -> List[str]:
+        """Extract lightweight search tags for threat-intel enrichment."""
+        tags = []
+        for surface in target_analysis.get('attack_surface', []):
+            if not isinstance(surface, dict):
+                continue
+            if surface.get('type') == 'technology':
+                value = str(surface.get('value', '')).strip()
+                if value:
+                    tags.append(value.lower())
+
+        if target_analysis.get('risk_level'):
+            tags.append(str(target_analysis['risk_level']).lower())
+
+        return list(dict.fromkeys(tags))
     
     async def _generate_optimal_attack_sequence(self, target_analysis: Dict[str, Any], 
                                               threat_intel: Dict[str, Any]) -> List[Dict[str, Any]]:

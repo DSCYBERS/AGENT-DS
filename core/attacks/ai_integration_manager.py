@@ -19,6 +19,7 @@ import asyncio
 import json
 import logging
 import time
+import os
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple, Union
 from dataclasses import dataclass, field
@@ -109,6 +110,10 @@ class AICoreIntegrationManager:
     def __init__(self, terminal_callback=None):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.terminal_callback = terminal_callback
+        self._enforce_scope_guard = os.getenv("AGENT_DS_ENFORCE_SCOPE_GUARD", "0").lower() in ("1", "true", "yes")
+        self._global_allowed_domains = self._parse_allowed_domains(
+            os.getenv("AGENT_DS_ALLOWED_DOMAINS", "")
+        )
         
         # Mission state
         self.current_mission = None
@@ -136,6 +141,50 @@ class AICoreIntegrationManager:
         self.coordination_queue = asyncio.Queue()
         
         self.logger.info("AI Core Integration Manager initialized")
+
+    def _parse_allowed_domains(self, domains_value: str) -> List[str]:
+        """Parse comma-separated domain list into normalized host suffixes"""
+        if not domains_value:
+            return []
+        return [d.strip().lower() for d in domains_value.split(",") if d.strip()]
+
+    def _extract_host(self, target_url: str) -> str:
+        """Extract hostname from URL/host input"""
+        if not target_url:
+            return ""
+        parsed = urlparse(target_url if "://" in target_url else f"https://{target_url}")
+        return (parsed.netloc or parsed.path).split("/")[0].split(":")[0].lower().strip()
+
+    def _is_domain_allowed(self, host: str, allowed_domains: List[str]) -> bool:
+        """Check if host matches any allowed domain/suffix"""
+        for domain in allowed_domains:
+            if host == domain or host.endswith(f".{domain}"):
+                return True
+        return False
+
+    def _validate_mission_authorization(self, target_url: str, mission_config: Dict[str, Any]):
+        """
+        Validate mission authorization and scope controls for company-only usage.
+        """
+        config = mission_config or {}
+        host = self._extract_host(target_url)
+        requested_auth = bool(config.get("authorized", False))
+        config_domains = config.get("allowed_domains", [])
+        if isinstance(config_domains, str):
+            allowed_domains = self._parse_allowed_domains(config_domains)
+        else:
+            allowed_domains = [str(d).strip().lower() for d in config_domains if str(d).strip()]
+        combined_allowed_domains = list(dict.fromkeys(allowed_domains + self._global_allowed_domains))
+
+        if self._enforce_scope_guard and not requested_auth:
+            raise PermissionError(
+                "Mission blocked: explicit authorization required (set `authorized=True` in mission config)."
+            )
+
+        if combined_allowed_domains and not self._is_domain_allowed(host, combined_allowed_domains):
+            raise PermissionError(
+                f"Mission blocked: target '{host}' is outside allowed domains: {combined_allowed_domains}"
+            )
     
     def _initialize_ai_components(self):
         """Initialize AI systems"""
@@ -273,6 +322,7 @@ class AICoreIntegrationManager:
         Start a new AI-coordinated mission
         """
         mission_id = str(uuid.uuid4())[:8]
+        self._validate_mission_authorization(target_url, mission_config or {})
         
         self.current_mission = MissionContext(
             mission_id=mission_id,
