@@ -89,31 +89,6 @@ class AIThinkingModel:
         
         # Enhanced attack patterns with success probability
         self.attack_patterns = {
-            'sql_injection': {
-                'success_indicators': ['mysql_fetch_array', 'ORA-', 'PostgreSQL', 'SQL syntax'],
-                'failure_indicators': ['404', 'not found', 'access denied'],
-                'base_score': 0.7,
-                'time_weight': 0.3
-            },
-            'xss': {
-                'success_indicators': ['<script>', 'alert(', 'document.cookie'],
-                'failure_indicators': ['escaped', 'filtered', 'blocked'],
-                'base_score': 0.6,
-                'time_weight': 0.2
-            },
-            'ssrf': {
-                'success_indicators': ['internal', 'localhost', 'metadata', 'aws'],
-                'failure_indicators': ['connection refused', 'timeout', 'blocked'],
-                'base_score': 0.5,
-                'time_weight': 0.4
-            },
-            'ssti': {
-                'success_indicators': ['49', '7*7', 'template', 'jinja'],
-                'failure_indicators': ['syntax error', 'template not found'],
-                'base_score': 0.4,
-                'time_weight': 0.3
-            }
-        }
         
             'sql_injection': {
                 'success_indicators': ['mysql_fetch_array', 'ORA-', 'PostgreSQL', 'SQL syntax', 'UNION', 'SELECT'],
