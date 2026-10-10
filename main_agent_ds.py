@@ -15,9 +15,11 @@ import sys
 import time
 import asyncio
 import argparse
+import ipaddress
 from pathlib import Path
 from datetime import datetime
 import json
+from urllib.parse import urlparse
 
 # Add project root to path
 project_root = Path(__file__).parent
@@ -81,6 +83,13 @@ class AgentDSMasterInterface:
         self.mission_id = None
         self.start_time = None
         self.theme = HackerTerminalTheme() if AGENT_DS_AVAILABLE else None
+        self.runtime_config = {
+            "company_name": "",
+            "operator_name": "",
+            "authorized": False,
+            "allowed_domains": [],
+            "otx_api_key": ""
+        }
         
         # Methodology phases with descriptions
         self.methodology_phases = [
@@ -174,6 +183,7 @@ class AgentDSMasterInterface:
         if not RICH_AVAILABLE:
             print("\n" + "="*80)
             print("AGENT DS v2.0 - AUTONOMOUS PENETRATION TESTING FRAMEWORK")
+            print("Created by Kashyap Divyansh, Founder of DSCYBER and Cyber Security Researcher")
             print("="*80)
             return
         
@@ -219,6 +229,7 @@ class AgentDSMasterInterface:
 [bright_white]Date:[/bright_white] [bright_yellow]{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}[/bright_yellow]
 [bright_white]Framework:[/bright_white] [bright_magenta]Autonomous Penetration Testing[/bright_magenta]
 [bright_white]AI Engine:[/bright_white] [bright_cyan]{'ACTIVE' if AGENT_DS_AVAILABLE else 'DEMO MODE'}[/bright_cyan]
+[bright_white]Creator:[/bright_white] [bright_green]Kashyap Divyansh (Founder, DSCYBER | Cyber Security Researcher)[/bright_green]
 [bright_white]Status:[/bright_white] [blink bright_red]🟢 OPERATIONAL[/blink bright_red]
 
 [bold bright_yellow]⚠️  LEGAL WARNING ⚠️[/bold bright_yellow]
@@ -292,29 +303,141 @@ class AgentDSMasterInterface:
         console.print(target_panel)
         
         while True:
-            target = console.input("\n[bold bright_green]🎯 Enter target: [/bold bright_green]").strip()
-            
-            if not target:
-                console.print("[bold red]❌ Target cannot be empty![/bold red]")
-                continue
-            
-            # Basic validation
-            if target.lower() in ['localhost', '127.0.0.1', '::1']:
-                console.print("[bold yellow]⚠️  Localhost target detected - proceeding with caution[/bold yellow]")
-            
-            # Confirm authorization
-            confirm = console.input(f"\n[bold bright_red]⚠️  Do you have explicit authorization to test '{target}'? (yes/no): [/bold bright_red]").strip().lower()
-            
-            if confirm in ['yes', 'y']:
-                self.target = target
-                self.mission_id = f"AGENTDS_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-                
-                console.print(f"\n[bold bright_green]✅ Target authorized: {target}[/bold bright_green]")
-                console.print(f"[bold bright_cyan]🆔 Mission ID: {self.mission_id}[/bold bright_cyan]")
-                return target
+            if RICH_AVAILABLE:
+                target = console.input("\n[bold bright_green]🎯 Enter target: [/bold bright_green]").strip()
             else:
-                console.print("[bold red]❌ Target not authorized. Exiting for legal compliance.[/bold red]")
-                sys.exit(1)
+                target = input("\n🎯 Enter target: ").strip()
+
+            valid, message = self._validate_target_format(target)
+            if not valid:
+                if RICH_AVAILABLE:
+                    console.print(f"[bold red]❌ {message}[/bold red]")
+                else:
+                    print(f"❌ {message}")
+                continue
+
+            return target
+
+    def _validate_target_format(self, target: str):
+        """Validate URL/domain/IP/CIDR target format"""
+        if not target:
+            return False, "Target cannot be empty"
+
+        value = target.strip()
+        lower_value = value.lower()
+        if lower_value in ['localhost', '127.0.0.1', '::1']:
+            return True, "Localhost target accepted"
+
+        parsed = urlparse(value if "://" in value else f"https://{value}")
+        host = (parsed.netloc or parsed.path).split("/")[0].split(":")[0].strip()
+        if not host:
+            return False, "Target must include a valid host"
+
+        try:
+            ipaddress.ip_address(host)
+            return True, "Valid IP target"
+        except ValueError:
+            pass
+
+        try:
+            ipaddress.ip_network(value, strict=False)
+            return True, "Valid network target"
+        except ValueError:
+            pass
+
+        if "." in host and " " not in host:
+            return True, "Valid domain target"
+
+        return False, "Unsupported target format. Use URL, domain, IP, or CIDR"
+
+    def _extract_host(self, target: str) -> str:
+        parsed = urlparse(target if "://" in target else f"https://{target}")
+        return (parsed.netloc or parsed.path).split("/")[0].split(":")[0].lower().strip()
+
+    def _is_host_allowed(self, host: str, allowed_domains):
+        for domain in allowed_domains:
+            normalized = domain.strip().lower()
+            if not normalized:
+                continue
+            if host == normalized or host.endswith(f".{normalized}"):
+                return True
+        return False
+
+    def _prompt_value(self, prompt_text: str) -> str:
+        if RICH_AVAILABLE:
+            return console.input(prompt_text).strip()
+        return input(prompt_text).strip()
+
+    def collect_and_validate_runtime_requirements(self, args):
+        """Collect required startup details, validate them, and prepare environment."""
+        target = args.target.strip() if args.target else self.get_target_input()
+        valid, message = self._validate_target_format(target)
+        if not valid:
+            raise ValueError(message)
+
+        company_name = (getattr(args, 'company_name', None) or "").strip()
+        if not company_name:
+            company_name = self._prompt_value("\n🏢 Enter company name: ")
+        if not company_name:
+            raise ValueError("Company name is required")
+
+        operator_name = (getattr(args, 'operator_name', None) or "").strip()
+        if not operator_name:
+            operator_name = self._prompt_value("👤 Enter operator name: ")
+        if not operator_name:
+            raise ValueError("Operator name is required")
+
+        allowed_domains_raw = (getattr(args, 'allowed_domains', None) or "").strip()
+        if not allowed_domains_raw:
+            allowed_domains_raw = self._prompt_value("🌐 Enter allowed company domains (comma-separated): ")
+        allowed_domains = [d.strip().lower() for d in allowed_domains_raw.split(",") if d.strip()]
+        if not allowed_domains:
+            raise ValueError("At least one allowed domain is required")
+
+        authorized = bool(getattr(args, 'authorized', False))
+        if not authorized:
+            auth_value = self._prompt_value(f"⚠️ Confirm explicit authorization for '{target}' (yes/no): ").lower()
+            authorized = auth_value in ("yes", "y")
+        if not authorized:
+            raise PermissionError("Target not authorized. Exiting for legal compliance.")
+
+        host = self._extract_host(target)
+        if not self._is_host_allowed(host, allowed_domains):
+            raise PermissionError(f"Target '{host}' is outside allowed domains: {allowed_domains}")
+
+        use_otx = self._prompt_value("🔐 Enable OTX threat intelligence? (yes/no): ").lower() in ("yes", "y")
+        otx_api_key = (getattr(args, 'otx_api_key', None) or "").strip()
+        if use_otx and not otx_api_key:
+            otx_api_key = self._prompt_value("🗝️ Enter OTX API key: ")
+            if not otx_api_key:
+                raise ValueError("OTX API key is required when OTX is enabled")
+
+        self.target = target
+        self.mission_id = f"AGENTDS_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        self.runtime_config = {
+            "company_name": company_name,
+            "operator_name": operator_name,
+            "authorized": authorized,
+            "allowed_domains": allowed_domains,
+            "otx_api_key": otx_api_key
+        }
+
+        # Export validated settings for framework components
+        os.environ["AGENT_DS_ENFORCE_SCOPE_GUARD"] = "1"
+        os.environ["AGENT_DS_ALLOWED_DOMAINS"] = ",".join(allowed_domains)
+        if otx_api_key:
+            os.environ["OTX_API_KEY"] = otx_api_key
+
+        if RICH_AVAILABLE:
+            console.print(f"\n[bold bright_green]✅ Target authorized: {target}[/bold bright_green]")
+            console.print(f"[bold bright_cyan]🆔 Mission ID: {self.mission_id}[/bold bright_cyan]")
+            console.print(f"[bright_white]🏢 Company:[/bright_white] [bright_yellow]{company_name}[/bright_yellow]")
+            console.print(f"[bright_white]👤 Operator:[/bright_white] [bright_yellow]{operator_name}[/bright_yellow]")
+            console.print(f"[bright_white]🌐 Allowed Domains:[/bright_white] [bright_green]{', '.join(allowed_domains)}[/bright_green]")
+            console.print(f"[bright_white]🔐 OTX Intel:[/bright_white] [bright_cyan]{'ENABLED' if otx_api_key else 'DISABLED'}[/bright_cyan]")
+        else:
+            print(f"\n✅ Target authorized: {target}")
+            print(f"🆔 Mission ID: {self.mission_id}")
     
     def create_live_display(self):
         """Create the live updating display"""
@@ -655,11 +778,11 @@ class AgentDSMasterInterface:
 
 [bold bright_green]Thank you for using Agent DS v2.0! 🚀[/bold bright_green]
 """
-            # Save report to HTML file
-            report_filename = f"agent_ds_report_{self.mission_id}.html"
-            with open(report_filename, "w", encoding="utf-8") as f:
-                f.write(results_text)
-            print(f"Report saved to: {report_filename}")
+        # Save report to HTML file
+        report_filename = f"agent_ds_report_{self.mission_id}.html"
+        with open(report_filename, "w", encoding="utf-8") as f:
+            f.write(results_text)
+        print(f"Report saved to: {report_filename}")
         
         results_panel = Panel(
             Align.center(results_text),
@@ -681,6 +804,11 @@ async def main():
     parser.add_argument('--interactive', '-i', action='store_true', help='Launch interactive mode')
     parser.add_argument('--demo', action='store_true', help='Run demonstration mode')
     parser.add_argument('--status', action='store_true', help='Show system status')
+    parser.add_argument('--authorized', action='store_true', help='Confirm target is explicitly authorized')
+    parser.add_argument('--allowed-domains', help='Comma-separated company domains allowed for testing')
+    parser.add_argument('--company-name', help='Company name for mission authorization record')
+    parser.add_argument('--operator-name', help='Operator name for mission authorization record')
+    parser.add_argument('--otx-api-key', help='AlienVault OTX API key for threat-intel enrichment')
     
     args = parser.parse_args()
     
@@ -713,15 +841,8 @@ async def main():
     # Show methodology overview
     interface.display_methodology_overview()
     
-    # Get target (from command line or user input)
-    if args.target:
-        interface.target = args.target
-        interface.mission_id = f"AGENTDS_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-        if RICH_AVAILABLE:
-            console.print(f"\n[bold bright_green]🎯 Target set: {interface.target}[/bold bright_green]")
-            console.print(f"[bold bright_cyan]🆔 Mission ID: {interface.mission_id}[/bold bright_cyan]")
-    else:
-        interface.get_target_input()
+    # Collect required runtime/API details, validate, then continue startup
+    interface.collect_and_validate_runtime_requirements(args)
     
     # Countdown
     if RICH_AVAILABLE:
